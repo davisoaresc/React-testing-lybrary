@@ -22,6 +22,8 @@ describe('Testes requisito 5, teste do component Pokedex', () => {
     expect(buttom).toBeInTheDocument();
 
     userEvent.click(buttom);
+    const nextPokemon = screen.getByText('Charmander');
+    expect(nextPokemon).toBeInTheDocument();
   });
 
   test('Testa se só um pokemon é exibido por vez', () => {
