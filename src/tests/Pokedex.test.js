@@ -3,59 +3,66 @@ import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import renderWithRouter from './renderWithRouter';
 import App from '../App';
+import pokemons from '../data';
 
-describe('Testes requisito 5, teste do component Pokedex', () => {
-  test('Testa se contem um heading h2 com o texto Encountered pokemons', () => {
+describe('Teste o componente "Pokedex.js"', () => {
+  beforeEach(() => {
     renderWithRouter(<App />);
+  });
 
-    const heading = screen.getByRole('heading', {
-      level: 2,
+  test('Teste se página contém um heading h2 com o texto Encountered pokémons', () => {
+    const headingTitle = screen.getByRole('heading', {
       name: 'Encountered pokémons',
+      level: 2,
     });
-    expect(heading).toBeInTheDocument();
+
+    expect(headingTitle).toBeInTheDocument();
   });
 
-  test('Testa se aparece o novo pokemon quando o botao é clicado', () => {
-    renderWithRouter(<App />);
+  test('Teste se é exibido o próximo Pokémon da lista quando o botão é clicado', () => {
+    const buttonValue = screen.getByRole('button', { name: 'Próximo pokémon' });
+    expect(buttonValue).toBeInTheDocument();
+    userEvent.click(buttonValue);
 
-    const buttom = screen.getByRole('button', { name: 'Próximo pokémon' });
-    expect(buttom).toBeInTheDocument();
-
-    userEvent.click(buttom);
-    const nextPokemon = screen.getByText('Charmander');
-    expect(nextPokemon).toBeInTheDocument();
+    expect(screen.getByText('Charmander')).toBeInTheDocument();
   });
 
-  test('Testa se só um pokemon é exibido por vez', () => {
-    renderWithRouter(<App />);
+  test('Teste se é mostrado apenas um Pokémon por vez', () => {
+    const getNameTestId = screen.getAllByTestId('pokemon-name');
 
-    const pokemonName = screen.getAllByText('More details');
-    expect(pokemonName.length).toBe(1);
+    expect(getNameTestId).toHaveLength(1);
   });
 
-  test('Testa se a pokedex possui um filtro de tipos de pokemon', () => {
-    renderWithRouter(<App />);
+  test('Teste se a Pokédex tem os botões de filtro', () => {
+    const amountButton = 7;
+    const buttonDataTestID = screen.getAllByTestId('pokemon-type-button');
+    expect(buttonDataTestID).toHaveLength(amountButton);
 
-    const pokemonType = screen.getAllByTestId('pokemon-type-button');
-    expect(pokemonType[0]).toBeInTheDocument();
-    const seven = 7;
+    const buttonAll = screen.getByRole('button', { name: 'All' });
+    expect(buttonAll).toBeInTheDocument(buttonAll);
 
-    expect(pokemonType).toHaveLength(seven);
-    expect(pokemonType[0]).toHaveTextContent('Electric');
-    expect(pokemonType[1]).toHaveTextContent('Fire');
-    expect(pokemonType[2]).toHaveTextContent('Bug');
-    expect(pokemonType[3]).toHaveTextContent('Poison');
-    expect(pokemonType[4]).toHaveTextContent('Psychic');
-    expect(pokemonType[5]).toHaveTextContent('Normal');
-    expect(pokemonType[6]).toHaveTextContent('Dragon');
+    pokemons.forEach(({ type }) => {
+      const buttonType = screen.getByRole('button', { name: type });
+      expect(buttonType).toBeInTheDocument();
+    });
   });
 
-  test('Testa se existe um botao para resetar os filtros', () => {
-    renderWithRouter(<App />);
+  test('Teste se a Pokédex contém um botão para resetar o filtro', () => {
+    const buttonAll = screen.getByRole('button', { name: 'All' });
 
-    const resetButton = screen.getByRole('button', { name: 'All' });
-    expect(resetButton).toBeInTheDocument();
+    userEvent.click(buttonAll);
+    const buttonTestId = screen.getByTestId('pokemon-name');
 
-    userEvent.click(resetButton);
+    expect(buttonTestId).toHaveTextContent('Pikachu');
+  });
+
+  test('teste se clicar no botão do elemento renderiza o elemento respectivo', () => {
+    const buttonDragon = screen.getByRole('button', { name: 'Dragon' });
+    expect(buttonDragon).toBeInTheDocument();
+    userEvent.click(buttonDragon);
+
+    const pokemonId = screen.getByTestId(/pokemon-name/i);
+    expect(pokemonId).toHaveTextContent('Dragonair');
+    expect(pokemonId).toBeInTheDocument();
   });
 });
